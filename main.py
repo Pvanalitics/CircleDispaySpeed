@@ -1,80 +1,80 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QPainter, QColor, QPen, QFont, QFontMetrics
-from PyQt5.QtCore import QPoint
+from PyQt5.QtCore import QRectF
 
 # Constants
-WIDTH, HEIGHT = 450, 450
-CIRCLE_RADIUS = 15
-TEXT_FONT_SIZE = 50
-PROFILE_FONT_SIZE = 20
-DISTANCE_FONT_SIZE = 35
+CIRCLE_PADDING = 15
+MAX_FONT_SIZE_RATIO = 0.1
+PROFILE_FONT_SIZE_RATIO = 0.05
+DISTANCE_FONT_SIZE_RATIO = 0.05  # Установим размер меньше, чтобы был чем у '30 km/h'
 
 class MyWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('AkaDisp_v0.1')
-        self.setGeometry(100, 100, WIDTH, HEIGHT)
+        self.setGeometry(100, 100, 450, 450)
         self.setAutoFillBackground(True)
-        p = self.palette()
-        p.setColor(self.backgroundRole(), QColor(20, 20, 20))
-        self.setPalette(p)
+        palette = self.palette()
+        palette.setColor(self.backgroundRole(), QColor(20, 20, 20))
+        self.setPalette(palette)
 
-    def paint_event(self, event):
+    def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        self.draw_circle(painter)
-        self.draw_text(painter)
-        self.draw_profile(painter)
-        self.draw_line(painter)
-        self.draw_distance(painter)
+        # Calculate the maximum possible size for the circle
+        circle_size = min(self.width() - CIRCLE_PADDING * 2, self.height() - CIRCLE_PADDING * 2)
 
-    def draw_circle(self, painter):
-        pen_circle = QPen(QColor(0, 255, 0), CIRCLE_RADIUS)
-        painter.setPen(pen_circle)
+        # Draw circle with green outline
+        green_pen = QPen(QColor(0, 255, 0), CIRCLE_PADDING)
+        painter.setPen(green_pen)
         painter.setBrush(QColor(0, 0, 0))
-        painter.drawEllipse(CIRCLE_RADIUS, CIRCLE_RADIUS, WIDTH - 2 * CIRCLE_RADIUS, HEIGHT - 2 * CIRCLE_RADIUS)
+        circle_rect = QRectF(CIRCLE_PADDING, (self.height() - circle_size) // 2, circle_size, circle_size)
+        painter.drawEllipse(circle_rect)
 
-    def draw_text(self, painter):
-        font = QFont('NHL Calgary', TEXT_FONT_SIZE)
-        painter.setFont(font)
-        pen_text = QPen(QColor(255, 255, 255))
-        painter.setPen(pen_text)
+        # Calculate font size based on the size of the circle and the length of the text
+        max_font_size = int(circle_size * MAX_FONT_SIZE_RATIO)
+
+        # Draw text '30 km/h'
         text = '30 km/h'
-        text_width = painter.fontMetrics().width(text)
-        text_height = painter.fontMetrics().height()
-        center_x = int((WIDTH - text_width) / 2)
-        center_y = int((HEIGHT + text_height) / 2)
-        center_point = QPoint(center_x, center_y)
-        painter.drawText(center_point, text)
+        font = QFont('NHL Calgary', max_font_size)
+        painter.setFont(font)
+        white_pen = QPen(QColor(255, 255, 255))
+        painter.setPen(white_pen)
+        font_metrics = QFontMetrics(font)
+        text_width = font_metrics.width(text)
+        text_height = font_metrics.height()
+        center_x = (self.width() - text_width) // 2
+        center_y = (self.height() + text_height) // 2
+        painter.drawText(center_x, center_y, text)
 
-    def draw_profile(self, painter):
-        profile_font = QFont('Arial', PROFILE_FONT_SIZE)
-        painter.setFont(profile_font)
+        # Draw profile text 'NORMAL'
         profile_text = 'NORMAL'
-        profile_text_width = painter.fontMetrics().width(profile_text)
-        profile_center_x = int((WIDTH - profile_text_width) / 2)
-        profile_center_y = int(center_y - text_height - 30)
-        profile_point = QPoint(profile_center_x, profile_center_y)
-        painter.drawText(profile_point, profile_text)
+        profile_font_size = int(max_font_size * PROFILE_FONT_SIZE_RATIO)
+        profile_font = QFont('Arial', profile_font_size)
+        painter.setFont(profile_font)
+        white_pen = QPen(QColor(255, 255, 255))
+        painter.setPen(white_pen)
+        profile_text_width = font_metrics.width(profile_text)
+        profile_center_x = (self.width() - profile_text_width) // 2
+        profile_center_y = center_y - text_height - CIRCLE_PADDING
+        painter.drawText(profile_center_x, profile_center_y, profile_text)
 
-    def draw_line(self, painter):
-        line_y = int(center_y - text_height - 20)
-        painter.drawLine(200, line_y, 250, line_y)
-
-    def draw_distance(self, painter):
-        distance_font = QFont('Arial', DISTANCE_FONT_SIZE)
-        painter.setFont(distance_font)
+        # Draw distance text '0:10 min'
         distance_text = '0:10 min'
-        distance_text_width = painter.fontMetrics().width(distance_text)
-        distance_center_x = int((WIDTH - distance_text_width) / 2)
-        distance_center_y = int(center_y + text_height + 10)
-        distance_point = QPoint(distance_center_x, distance_center_y)
-        painter.drawText(distance_point, distance_text)
+        distance_font_size = int(max_font_size * DISTANCE_FONT_SIZE_RATIO)
+        distance_font = QFont('Arial', distance_font_size)
+        painter.setFont(distance_font)
+        white_pen = QPen(QColor(255, 255, 255))
+        painter.setPen(white_pen)
+        distance_text_width = font_metrics.width(distance_text)
+        distance_center_x = (self.width() - distance_text_width) // 2
+        distance_center_y = center_y + text_height + CIRCLE_PADDING
+        painter.drawText(distance_center_x, distance_center_y, distance_text)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MyWidget()
-    window.showFullScreen()  # <--- Make the window full screen
+    window.show()
     sys.exit(app.exec_())
