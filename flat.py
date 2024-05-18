@@ -1,14 +1,13 @@
-import math
 import flet as ft
 import flet.canvas as cv
 
 def main(page: ft.Page):
     page.padding = 0
-    page.window_height = 525
+    page.window_height = 527
     page.window_width = 500
     num = 83
     page.window_title_bar_hidden = True
-    stroke_paint = ft.Paint(stroke_width=15, style=ft.PaintingStyle.STROKE, color=ft.colors.BLUE)
+    stroke_paint = ft.Paint(stroke_width=20, style=ft.PaintingStyle.STROKE, color=ft.colors.BLUE)
 
     # Загрузка шрифта
     page.fonts = {
@@ -17,7 +16,7 @@ def main(page: ft.Page):
 
     cp = cv.Canvas(
         [
-            cv.Circle(250, 250, 242, stroke_paint),
+            cv.Circle(250, 250, 240, stroke_paint),
             cv.Path(
                 [
                     cv.Path.MoveTo(50, 250),
@@ -56,6 +55,13 @@ def main(page: ft.Page):
         expand=True,
     )
 
-    page.add(cp)
+    container = ft.Container(
+        content=cp,
+        width=500,
+        height=525,
+        bgcolor="url(wlp.jpg)"
+    )
+
+    page.add(container)
 
 ft.app(main)
